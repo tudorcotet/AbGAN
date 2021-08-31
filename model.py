@@ -3,15 +3,16 @@ import tensorflow as tf
 import timeit
 
 
-#HYPERPARAMETERS
 
+Z_DIM = 128
+
+#HYPERPARAMETERS
 SCALE = 1
 BATCH_SIZE_DISC = 64
 BATCH_SIZE_GEN = 64
 BATCH_SIZE_MAX = max(BATCH_SIZE_DISC, BATCH_SIZE_GEN)
 KAPPA = 0.5
 SOFT_WEIGHT_THRESHOLD= 0.5
-Z_DIM = 128
 
 
 
@@ -118,7 +119,7 @@ class ContinuousConditionalGAN(tf.keras.Model):
 
         batch_fake_images = generator((z_tensor, self.embedding(batch_fake_labels)))
 
-        if self.threshold_type == "soft":
+        if self.threshold_type == 'soft':
             real_weights = tf.math.exp( - KAPPA*(batch_real_labels - batch_target_labels)**2)
             fake_weights = tf.math.exp( - KAPPA*(batch_fake_labels - batch_target_labels)**2)
         else:
@@ -160,7 +161,6 @@ class ContinuousConditionalGAN(tf.keras.Model):
             if self.loss_type == 'vanilla':
                 dis_out = tf.keras.activations.sigmoid(dis_out)
                 g_loss = -tf.math.reduce_mean(tf.math.log(dis_out+1e-20))
-
             elif self.loss_type == 'hinge':
                 g_loss = tf.math.reduce_mean(dis_out)
 
@@ -175,7 +175,6 @@ class ContinuousConditionalGAN(tf.keras.Model):
             "g_loss": self.gen_loss_tracker.result(),
             "d_loss": self.disc_loss_tracker.result(),
         }
-
 
 
 
@@ -219,5 +218,5 @@ if __name__ == '__main__':
     ContCondGan.compile(disc_optimizer, gen_optimizer, clip_label=False, threshold_type='hard', loss_type='vanilla')
 
 
-    for iter in (0,30):
-        ContCondGan.train_step()
+
+    ContCondGan.train_step(dataset)
